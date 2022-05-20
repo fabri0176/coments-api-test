@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Comment } from './comment.entity'
+import { Comment } from './comment.entity';
 
 @Injectable()
 export class CommentsService {
@@ -21,6 +21,8 @@ export class CommentsService {
     updateComment(id: string, message: any) {
         const comment: Comment = this.getComment(id);
         comment.message = message;
+
+        return comment;
     }
 
     createComment(message: string) {
