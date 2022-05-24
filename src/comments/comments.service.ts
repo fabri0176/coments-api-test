@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Comment } from './comment.entity';
 
 @Injectable()
@@ -15,7 +15,12 @@ export class CommentsService {
     }
 
     getComment(id: string): Comment {
-        return this.comments.find((item) => item.id == id);
+        const comment = this.comments.find((item) => item.id == id);
+        if(!comment){
+            throw new NotFoundException("Resource no found");
+        }
+
+        return comment;
     }
 
     updateComment(id: string, message: any) {
