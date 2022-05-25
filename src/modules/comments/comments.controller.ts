@@ -21,7 +21,7 @@ export class CommentsController {
     }
 
     @Post()
-    createComment(@Body('message') message: string) {
+    createComment(@Body('message') message: string):void {
         this.commentService.createComment(message);
     }
 
