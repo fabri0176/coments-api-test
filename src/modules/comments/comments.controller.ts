@@ -11,7 +11,7 @@ export class CommentsController {
     }
 
     @Get()
-    getTuits(@Query() filterQuery): Comment[] {
+    getComments(@Query() filterQuery): Comment[] {
         const { orderBy, searchTerm } = filterQuery;
         return this.commentService.getComments();
     }
