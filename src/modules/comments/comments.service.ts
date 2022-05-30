@@ -1,22 +1,26 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+
 import { Comment } from './comment.entity';
 import { CreateCommentDto, UpdateCommentDto } from './dto';
 
 @Injectable()
 export class CommentsService {
-    private comments: Comment[] = [
-        {
-            id: "1",
-            message: "First message",
-        }
-    ];
 
-    getComments(): Comment[] {
-        return this.comments;
+
+    constructor(@InjectRepository(Comment) private readonly commentRepository: Repository<Comment>) {
+
     }
 
-    getComment(id: string): Comment {
-        const comment = this.comments.find((item) => item.id == id);
+    async getComments(): Promise<Comment[]> {
+        return await this.commentRepository.find();
+    }
+
+    async getComment(id: number): Promise<Comment> {
+        const comment = await this.commentRepository.findOne({where: {
+            id: id,
+        }});
         if (!comment) {
             throw new NotFoundException("Resource no found");
         }
@@ -24,25 +28,33 @@ export class CommentsService {
         return comment;
     }
 
-    updateComment(id: string, { message }: UpdateCommentDto) {
-        const comment: Comment = this.getComment(id);
-        comment.message = message;
+    async updateComment(id: number, { message }: UpdateCommentDto): Promise<Comment> {
+        const comment: Comment = await this.commentRepository.preload({
+            id,
+            message
+        });
+
+        if (!comment) {
+            throw new NotFoundException("Resource no found");
+        }
 
         return comment;
     }
 
-    createComment({ message }: CreateCommentDto) {
-        this.comments.push({
-            id: (Math.floor(Math.random() * 2000) + 1).toString(),
-            message
-        });
+    async createComment({ message }: CreateCommentDto): Promise<Comment> {
+        const comment: Comment = this.commentRepository.create({ message });
+        return this.commentRepository.save(comment);
     }
 
-    removeComment(id: string) {
-        const index = this.comments.findIndex((comment) => comment.id === id);
+    async removeComment(id: number): Promise<void> {
+        const comment: Comment = await this.commentRepository.findOne({where: {
+            id: id,
+        }});
 
-        if (index >= 0) {
-            this.comments.splice(index, 1);
+        if (!comment) {
+            throw new NotFoundException("Resource no found");
         }
+
+        this.commentRepository.remove(comment);
     }
 }
